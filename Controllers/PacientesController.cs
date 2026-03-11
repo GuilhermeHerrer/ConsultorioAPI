@@ -16,27 +16,35 @@ namespace ConsultorioAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Paciente>>> GetPaciente()
+        public async Task<ActionResult> GetPaciente()
         {
             var pacientes = await _context.Pacientes.ToListAsync();
-            return pacientes;
+            return Ok(pacientes);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Paciente>> GetPaciente(int id)
+        public async Task<ActionResult> GetPacienteId(int id)
         {
             var paciente = await _context.Pacientes.FindAsync(id);
             if (paciente == null)
             {
                 return NotFound();
             }
-            return paciente;
+            return Ok(paciente);
         }
 
         [HttpPost]
 
-        public async Task<ActionResult<Paciente>> PostPaciente(Paciente paciente)
+        public async Task<ActionResult> PostPaciente(Paciente paciente)
         { 
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            if (await _context.Pacientes.AnyAsync(p => p.Email == paciente.Email || p.CPF == paciente.CPF))
+            {
+                return BadRequest("Email ou CPF já cadastrado.");
+            }
             _context.Pacientes.Add(paciente);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetPaciente), new { id = paciente.Id }, paciente);
@@ -48,11 +56,31 @@ namespace ConsultorioAPI.Controllers
         {
             if (id != paciente.Id)
             {
-                return BadRequest();
+                return BadRequest("ID do paciente não correponde ao ID da URL");
             }
-            _context.Entry(paciente).State = EntityState.Modified;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var pacienteExistente = await _context.Pacientes.FindAsync(id);
+
+            if (pacienteExistente == null)
+            {
+                return NotFound();
+            }
+            if (await _context.Pacientes.AnyAsync(p => p.Email == paciente.Email || p.CPF == paciente.CPF))
+            {
+                return BadRequest("Email ou CPF já cadastrado.");
+            }
+
+            pacienteExistente.Nome = paciente.Nome;
+            pacienteExistente.Email = paciente.Email;
+            pacienteExistente.CPF = paciente.CPF;
+
+            _context.Update(pacienteExistente);
             await _context.SaveChangesAsync();
-            return Ok(paciente);
+            return Ok(pacienteExistente);
         }
 
         [HttpDelete("{id}")]

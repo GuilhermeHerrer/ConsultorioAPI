@@ -1,5 +1,6 @@
 using ConsultorioAPI.Data;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,8 +20,11 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options => { options.RoutePrefix = "swagger"; });
+    app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("Consultório API").WithTheme(ScalarTheme.DeepSpace);
+    });
 }
 
 app.UseHttpsRedirection();

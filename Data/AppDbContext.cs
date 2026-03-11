@@ -8,5 +8,12 @@ namespace ConsultorioAPI.Data
         {
         }
         public DbSet<Paciente> Pacientes { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Paciente>().HasIndex(p => p.Email).IsUnique();
+            modelBuilder.Entity<Paciente>().HasIndex(p => p.CPF).IsUnique();
+        }
     }
 }
