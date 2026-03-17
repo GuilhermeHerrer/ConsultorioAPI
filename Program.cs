@@ -1,4 +1,5 @@
 using ConsultorioAPI.Data;
+using ConsultorioAPI.Service;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using System;
@@ -14,6 +15,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddHttpClient<ViaCepService>();
 
 var app = builder.Build();
 
